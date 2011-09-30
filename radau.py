@@ -14,32 +14,6 @@ import Config
 _PORT = 0x4ada
 _CFGFILE = "radau.cfg"
 
-class Target:
-	"""
-	Represent a single target
-	"""
-	cnt = 0
-	def __init__(self, proto, ip, pw):
-		self.proto = proto
-		self.ip    = ip
-		self.pw    = pw
-
-class TargetList:
-	"""
-	Manage a target list
-	"""
-	dest = []
-
-	def add(self, proto, ip, pw):
-		host = Target(proto, ip, pw)
-		self.dest.append(host)
-
-	def __len__(self):
-		return len(self.dest)
-
-	def __getitem__(self,x):
-		return self.dest[x]
-
 class Packet:
 	pass
 
@@ -82,7 +56,7 @@ class Server(asyncore.dispatcher):
 
 if __name__ == '__main__':
 	cfg = Config.Loader(_CFGFILE)
-	Server(cfg, Socket.AF_INET)
-	Server(cfg, Socket.AF_INET6)
+	Server(cfg, socket.AF_INET)
+	Server(cfg, socket.AF_INET6)
 	asyncore.loop(1)
 

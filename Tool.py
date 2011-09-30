@@ -28,12 +28,12 @@ def hostport(s,port=0):
 	def ret(hp):
 		h = hp[0]
 		p = hp[1]
-		if h[0]=='[' and h[-1]==']':
+		if h and h[0]=='[' and h[-1]==']':
 			h = h[1:-1]
 		return (h!='*' and h or '', intval(p) or socket.getservbyname(p))
 
 	hp = s.rsplit(':',1)
-	if s[0]=='[':
+	if s and s[0]=='[':
 		# we have a host part
 		if len(hp)==2 and hp[0][-1]==']':
 			return ret(hp)

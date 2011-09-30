@@ -4,6 +4,9 @@ from Logging import Log
 import Reg
 import Target
 import Port
+import Tool
+import Defaults
+import socket
 
 class Config:
 	"""
@@ -39,26 +42,26 @@ class Load(Config):
 		try:
 			fn = getattr(self,'cfg_'+s[0])
 		except AttributeError as e:
-			Log.err('config syntax: {0}:{1}: {3} {4}: {2}', self.name, self.lineno, line, type(e), e)
+			Log.xerr('config syntax: {0}:{1}: {3} {4}: {2}', self.name, self.lineno, line, type(e), e)
 			return
 		try:
 			fn(*s[1:])
 		except Exception as e:
-			Log.err('config error: {0}:{1}: {3} {4}: {2}', self.name, self.lineno, line, type(e), e)
+			Log.xerr('config error: {0}:{1}: {3} {4}: {2}', self.name, self.lineno, line, type(e), e)
 			return
 
 	def cfg_listen6(self, nameport):
-		np = Tool.hostport(nameport)
-		self.port.add(Socket.AF_INET6, np)
+		np = Tool.hostport(nameport, Defaults.PORT)
+		self.port.add(socket.AF_INET6, np)
 
 	def cfg_listen4(self, nameport):
-		np = Tool.hostport(nameport)
-		self.port.add(Socket.AF_INET, np)
+		np = Tool.hostport(nameport, Defaults.PORT)
+		self.port.add(socket.AF_INET, np)
 
 	def cfg_host(self, nameport, *args):
-		np   = Tool.hostport(nameport)
+		np   = Tool.hostport(nameport, Defaults.PORT)
 		name = np[0]
-		port = len(np)>1 and intval(np[1]) or _PORT
+		port = len(np)>1 and Tool.intval(np[1]) or _PORT
 		pw   = len(np)>2 and np[2] or ''
 		sa   = socket.getaddrinfo(name, port)
 		if not sa:
@@ -67,15 +70,15 @@ class Load(Config):
 
 		for a in sa:
 			if a[0] != socket.AF_INET and a[0] != socket.AF_INET6:
-				Log.warn("wrong family {0} for {1}", Helper.sockfam(a[0]), name)
+				Log.warn("wrong family {0} for {1}", Tool.sockfam(a[0]), name)
 				continue
 			if a[1] != socket.SOCK_DGRAM:
-				Log.warn("ignore type {0} for {1}", Helper.socktype(a[1]), name)
+				Log.info("ignore type {0} for {1}", Tool.socktype(a[1]), name)
 				continue
 			if a[2] != socket.IPPROTO_UDP:
-				Log.warn("ignore proto {0} for {1}", Helper.sockproto(a[2]), name)
+				Log.info("ignore proto {0} for {1}", Tool.sockproto(a[2]), name)
 				continue
-			Log.info("host {0}: {2} {1}", name, a[4], Helper.sockfam(a[0]))
+			Log.info("host {0}: {2} {1}", name, a[4], Tool.sockfam(a[0]))
 			self.target.add(a[0], a[4], pw)
 
 class Loader(Load):
