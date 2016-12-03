@@ -44,18 +44,23 @@ vi radau.cfg
 radau.cfg is made of config lines with space arguments:
 
 # comment
-listen IP:PORT
-listen6 IP:PORT
-host HOSTNAME:PORT PASSWORD
+listen `IP:PORT`
+listen6 `IP:PORT`
+peer `NAME` `PASSWORD` `HOSTNAME:PORT`
+file `FILE`
+dir `PATH`
 
 Lines starting with `#` and empty lines are ignored.
 
-IP:PORT is optional.  PORT defaults to 0x4adau in C notation, which is 19162.  IP defaults to '' which is the same as '*' which means 'all local IPs'.  It can be a resolveable hostname, too.
+- Each line can be given as often as you like.  Arguments are space separates and cannot contain spaces.
+- IP:PORT is optional.  `PORT` defaults to 0x4adau in C notation, which is 19162.  `IP` defaults to '' (empty string) which is the same as `*` which means 'all local IPs'.  It can be a resolveable hostname, too.
+- NAME is a symbolic name of a known peer.  A machine shall not be known with different peer names, so keep this the same across all machines.
+- HOSTNAME can be either an IP, a resolveable hostname or `*` for hosts with dynamic IP.  PORT is optional and defaults to 0x4adau in C notation (19162).
+- PASSWORD is an optional shared secret.
+- `FILE` is a filename relative to the current file being read.  If it is not found there, it is searched in `~/.radau/`, `~/.rc/radau/` and `/etc/radau` in this sequence.  Globbing is not supported.
+- `PATH` is a directory relative to the current file being read.  If it is not found there, it is searched in `~/.radau/`, `~/.rc/radau/` and `/etc/radau` in this sequence.  If it ends in `/` all files named `*.conf` are read, and at least one must be there.  Else (not ending on `/`) globbing is done on the last component to search for all files.  In that case is "nothing found" is no error.
 
-HOSTNAME can be either an IP, a resolveable hostname or "*" for hosts with dynamic IP.  PORT is optional and defaults to 0x4adau in C notation (19162).
-PASSWORD is an optional shared secret.
-
-You must run Radau on each destination for it to be able to handle everything.
+You must run Radau on each destination for it to be able to handle everything and both sides must agree to the same password.
 
 
 Usage
