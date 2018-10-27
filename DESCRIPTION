@@ -1,0 +1,20 @@
+Unidirectonal network with a fixed packet rate
+
+"Radau" is a German term which means "noise" like caused by a "racket" or a "row".
+
+Radau sends out N+R packets per second, and will receive N+R packets in average.
+This is intentional to keep a stable network data rate.
+
+In the standard case the number of directed packets (N) is 1
+and the number or random packets (R) is 0.
+
+This way it learns, slowly, about the network of other computers running Radau, too.
+So each node is able to plot the network and track changes to it.
+
+Today it only offers an archive of network reachability and health.
+
+In the future the goal is to create a secured overlay network which offers secure channels
+between nodes, which neither know each other nor can talk to each other.
+I call this a BlackNet, because it works a bit like a bunch of Black Holes communicating via Hawking radiation.
+It works a bit darker than Darknets then, because it neither does not know a source nor destination IP,
+all you need is to know a network key to become part of such a network.
