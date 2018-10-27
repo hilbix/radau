@@ -1,7 +1,7 @@
 # Makefile automatically generated, do not edit!
 # This output (only this Makefile) is Public Domain.
 #
-#@MD5TINOIGN@ Creation date: Sat Oct 27 11:32:16 CEST 2018
+#@MD5TINOIGN@ Creation date: Sat Oct 27 20:59:42 CEST 2018
 #
 # This file is based on following files:
 #@MD5TINOIGN@ 1: Makefile.tino
@@ -72,6 +72,7 @@ VERSIONNAME=$(VERSIONFILE)
 
        GAWK=awk
       TOUCH=touch
+      MKDIR=mkdir
 
          CP=cp
       STRIP=strip
@@ -128,6 +129,7 @@ $(VERSIONFILE).py:	VERSION
 
 install::
 	$(RM) "$(INSTALLPATH)/bin/$(PROG1)"
+	$(MKDIR) -pm755 "$(INSTALLPATH)/bin"
 	$(CP) "$(PROG1)" "$(INSTALLPATH)/bin/$(PROG1)"
 	$(STRIP) "$(INSTALLPATH)/bin/$(PROG1)"
 
@@ -168,5 +170,6 @@ $(PROG1):	$(PROG1).o $(OBJS) $(LIBS)
 # compiler generated dependencies, remove if incorrect
 
 # included: radau.d
-$(PROG1).o:
+$(PROG1).o:  radau.c radau.h radau_version.h rio.h raddr.h rref.h
+
 # end
