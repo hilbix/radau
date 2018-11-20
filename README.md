@@ -68,7 +68,7 @@ To connect to the socket just do `socat - /var/tmp/radau/sock`
   - `PAYLOAD` has the structure `LENGTH[1] TYPE[1] DATA[LENGTH-2]`
   - `LENGTH==1` means `PADDING`, or a `NOP` payload.  It can be anywhere.
   - `LENGTH==0` means `DATA` is the all the `PAYLOAD` up to the CRC
-  - `TYPE` is dependent on the `PROTO`.  With the default `PROTO` see below
+  - `TYPE` is dependent on the `PROTO`.  With the default `PROTO`, please see `rproto.h`
 
 - Pure ANSI-C for maximum portability
 
