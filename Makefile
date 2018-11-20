@@ -1,11 +1,11 @@
 # Makefile automatically generated, do not edit!
 # This output (only this Makefile) is Public Domain.
 #
-#@MD5TINOIGN@ Creation date: Sat Oct 27 20:59:42 CEST 2018
+#@MD5TINOIGN@ Creation date: Tue Nov 20 08:45:38 CET 2018
 #
 # This file is based on following files:
 #@MD5TINOIGN@ 1: Makefile.tino
-#@MD5TINOIGN@ 2: /home/tino/src/tinolib/Makefile.proto
+#@MD5TINOIGN@ 2: tino/Makefile.proto
 
 #
 #@MD5TINOIGN@ included: Makefile.tino
@@ -33,7 +33,7 @@ ADD_LDFLAGS=
    TINOCOPY=
 
 #
-#@MD5TINOIGN@ included: /home/tino/src/tinolib/Makefile.proto
+#@MD5TINOIGN@ included: tino/Makefile.proto
 #
 
 # Automatically generated from "PROGS" above
@@ -170,6 +170,11 @@ $(PROG1):	$(PROG1).o $(OBJS) $(LIBS)
 # compiler generated dependencies, remove if incorrect
 
 # included: radau.d
-$(PROG1).o:  radau.c radau.h radau_version.h rio.h raddr.h rref.h
+$(PROG1).o:  radau.c tino/dirty.h tino/file.h tino/sysfix.h \
+ tino/sysfix_cygwin.h tino/sysfix_diet.h tino/sysfix_linux.h \
+ tino/sysfix_osx.h tino/type.h tino/alloc.h tino/debug.h tino/err.h \
+ tino/fatal.h tino/ex.h tino/arg.h tino/fatal.h tino/getopt.h radau.h \
+ radau_version.h rio.h raddr.h rref.h rlist.h rring.h rtimer.h \
+ rprogress.h
 
 # end
