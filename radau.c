@@ -1,27 +1,20 @@
 #define _GNU_SOURCE
 
-#include <stdio.h>
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <stdlib.h>
-#include <unistd.h>
-#include <string.h>
-#include <netdb.h>
+#include "tino/dirty.h"
+#include "tino/file.h"
+#include "tino/alloc.h"
+#include "tino/fatal.h"
+#include "tino/getopt.h"
 
 #include "radau.h"
 #include "radau_version.h"
 
 #include "rio.h"
 #include "raddr.h"
+#include "rtimer.h"
+#include "rprogress.h"
 
 #if 0
-void
-oops(const char *s)
-{
-  perror(s);
-  exit(1);
-}
-
 int
 main(int argc, char **argv)
 {
@@ -29,14 +22,6 @@ main(int argc, char **argv)
   struct addrinfo	*ret, hint;
   const char		*host, *port, *text;
   size_t		len;
-
-  if ((fd = socket(AF_INET, SOCK_DGRAM, 0))<0)
-    oops("no socket");
-
-  host	= argc>1 ? argv[1] : "localhost";
-  port	= argc>2 ? argv[2] : "1111";
-  text	= argc>3 ? argv[3] : "hello world";
-  len	= strlen(text);
 
   memset(&hint, 0, sizeof hint);
   hint.ai_family	= AF_UNSPEC;
@@ -47,9 +32,7 @@ main(int argc, char **argv)
   for (;;)
     {
       if (sendto(fd, text, len, 0, ret->ai_addr, ret->ai_addrlen)!=len)
-	oops("send error");
-      write(1, ".", 1);
-      usleep(100000);
+        oops("send error");
     }
 }
 #endif
@@ -58,6 +41,7 @@ void
 r_init(R)
 {
   memset(r, 0, sizeof *r);
+  r_addr_init(r);
 }
 
 int
@@ -70,11 +54,21 @@ r_exit(R)
 void
 r_setup(R)
 {
+  FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
+
+  r_timer_start(r);
+
+  printf("%d addresses\n", r_ring_len(r->ring));
 }
 
 void
 r_run(R)
 {
+  while (r->sock>=0)
+    {
+      pause();
+      r_progress(r);
+    }
 }
 
 int
@@ -82,12 +76,26 @@ main(int argc, char **argv)
 {
   R;
   struct radau	radau;
-  int		i;
+  int		argn;
+
+  argn	= tino_getopt(argc, argv, 0, -1,
+                      TINO_GETOPT_VERSION(RADAU_VERSION)
+                      " [destination]..",
+
+                      TINO_GETOPT_USAGE
+                      "h	this help"
+                      ,
+
+                      NULL
+                      );
+  if (argn<=0)
+    return 1;
 
   r = &radau;
   r_init(r);
-  for (i=0; ++i<=argc; r_addr_add(r, argv[0]));
-  r_setup(r, r_timer);
+  for (; argn<argc; argn++)
+    r_addr_add(r, argv[argn]);
+  r_setup(r);
   r_run(r);
   return r_exit(r);
 }
