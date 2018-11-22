@@ -38,14 +38,15 @@ main(int argc, char **argv)
 #endif
 
 void
-r_init(R)
+r_main_init(R)
 {
   memset(r, 0, sizeof *r);
   r_addr_init(r);
+  r_recv_init(r);
 }
 
 int
-r_exit(R)
+r_main_exit(R)
 {
   /* XXX TODO XXX implement this	*/
   return 0;
@@ -56,17 +57,18 @@ r_setup(R)
 {
   FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
 
-  r_timer_start(r);
+  r_timer_setup(r);
+  r_recv_setup(r);
 
   printf("%d addresses\n", r_ring_len(r->ring));
 }
 
 void
-r_run(R)
+r_main(R)
 {
   while (r->sock>=0)
     {
-      pause();
+      r_recv();
       r_progress(r);
     }
 }
@@ -92,11 +94,11 @@ main(int argc, char **argv)
     return 1;
 
   r = &radau;
-  r_init(r);
+  r_main_init(r);
   for (; argn<argc; argn++)
     r_addr_add(r, argv[argn]);
-  r_setup(r);
-  r_run(r);
-  return r_exit(r);
+  r_main_setup(r);
+  r_main(r);
+  return r_main_exit(r);
 }
 
