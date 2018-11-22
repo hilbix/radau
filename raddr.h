@@ -50,16 +50,52 @@ r_addr_valid(struct addrinfo *a)
   return 1;
 }
 
-static int
-r_addr_add(R, const char *s)
+static struct addrinfo *
+r_addr_get(R, const char *s)
 {
   struct addrinfo	*ret, hint;
-  R_REF			refs;
+  size_t		len;
+  char			*host, *port;
+
+  len   = strlen(s)+1;
+  host  = (char *)TINO_F_alloca(len);
+  memcpy(host, s, len);
 
   memset(&hint, 0, sizeof hint);
   hint.ai_family        = AF_UNSPEC;
   hint.ai_flags         = AI_IDN;
-  if (getaddrinfo(s, STRINGIFY(R_PORT), &hint, &ret) || !ret)
+
+  /* Grok IPv6	*/
+  if (*host=='[')
+    {
+      host++;
+      hint.ai_family	= AF_INET6;
+      port	= strchr(host, ']');
+      if (!port)
+        return 0;
+      *port++	= 0;
+    }
+  else /* any	*/
+    port	= strchr(host, ':');
+
+  if (!port || !*port)
+    port	= STRINGIFY(R_PORT);
+  else if (*port!=':')
+    return 0;
+  else
+    *port++	= 0;
+
+  return getaddrinfo(host, port, &hint, &ret) ? 0 : ret;
+}
+
+static int
+r_addr_add(R, const char *s)
+{
+  struct addrinfo	*ret;
+  R_REF			refs;
+
+  ret	= r_addr_get(r, s);
+  if (!ret)
     {
       WARN(r, "cannot resolve '%s'", s);
       return 1;
