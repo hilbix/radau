@@ -1,40 +1,19 @@
-#ifndef	_INC_RADAU_H
-#define	_INC_RADAU_H
+/* This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+ */
 
-#define	_STRINGIFY(X)	#X
-#define	STRINGIFY(X)	_STRINGIFY(X)
+#include "rref.h"
 
-#define	R_PORT		19162	/* 0x4adau	*/
-#define	R		struct radau *r
+#include "raddr.h"
 
-#define	R_HD_IP_MIN	20
-#define	R_HD_IP_MAX	60
-#define	R_HD_UDP	8
+#include "rtimer.h"
 
-#define	R_IP4_MIN_SZ	576
-#define	R_IP6_MIN_SZ	1500
-#define	R_IP_MAX_SZ	65535
+#include "rcon.h"
+#include "rin.h"
+#include "rout.h"
 
-struct radau
-  {
-    /* dynamics	*/
-    struct rref		*refs, *refc;
-    struct rring	*ring;
+#include "rmain.h"
+#include "rconfig.h"
 
-    /* states	*/
-    int			tick;
-
-    /* statics	*/
-    int			sock;
-
-    /* proto	*/
-
-    /* settings	*/
-    int			cycle;	/* ms	*/
-
-    /* temps	*/
-    char		packet[R_IP_MAX_SZ];
-  };
-
-#endif
+#undef	RADAU_PHASE
 
