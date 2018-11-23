@@ -1,3 +1,9 @@
+/* RADAU wrapper
+ *
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+ */
+
 #define _GNU_SOURCE
 
 #include "tino/dirty.h"
@@ -6,79 +12,51 @@
 #include "tino/fatal.h"
 #include "tino/getopt.h"
 
-#include "radau.h"
 #include "radau_version.h"
 
-#include "rio.h"
-#include "raddr.h"
-#include "rtimer.h"
-#include "rprogress.h"
 
+#define _STRINGIFY(X)	#X
+#define STRINGIFY(X)	_STRINGIFY(X)
+
+#define R_HD_IP_MIN	20
+#define R_HD_IP_MAX	60
+#define R_HD_UDP	8
+
+#define R_IP4_MIN_SZ	576
+#define R_IP6_MIN_SZ	1500
+#define R_IP_MAX_SZ	65535
+
+#define R_PORT		19162   /* 0x4adau      */
+#define R		struct radau *r
+
+
+struct radau
+  {
 #if 0
-int
-main(int argc, char **argv)
-{
-  int			fd;
-  struct addrinfo	*ret, hint;
-  const char		*host, *port, *text;
-  size_t		len;
-
-  memset(&hint, 0, sizeof hint);
-  hint.ai_family	= AF_UNSPEC;
-  hint.ai_flags		= AI_IDN;
-  if (getaddrinfo(host, port, &hint, &ret))
-    oops("cannot resolve");
-
-  for (;;)
-    {
-      if (sendto(fd, text, len, 0, ret->ai_addr, ret->ai_addrlen)!=len)
-        oops("send error");
-    }
-}
+    char                packet[R_IP_MAX_SZ];
 #endif
 
-void
-r_main_init(R)
-{
-  memset(r, 0, sizeof *r);
-  r_addr_init(r);
-  r_recv_init(r);
-}
+    void (*	modadd)(R, void (*init)(R), void (*exit)(R));
+    int		modules;
+    struct
+      {
+        void (*		init)(R);
+        void (*		exit)(R);
+      }		module[10];
 
-int
-r_main_exit(R)
-{
-  /* XXX TODO XXX implement this	*/
-  return 0;
-}
+#define	RADAU_PHASE	1
+#include "radau.h"
+  };
 
-void
-r_setup(R)
-{
-  FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
-
-  r_timer_setup(r);
-  r_recv_setup(r);
-
-  printf("%d addresses\n", r_ring_len(r->ring));
-}
-
-void
-r_main(R)
-{
-  while (r->sock>=0)
-    {
-      r_recv();
-      r_progress(r);
-    }
-}
+#define	RADAU_PHASE	2
+#include "radau.h"
 
 int
 main(int argc, char **argv)
 {
   R;
   struct radau	radau;
-  int		argn;
+  int		argn, i;
 
   argn	= tino_getopt(argc, argv, 0, -1,
                       TINO_GETOPT_VERSION(RADAU_VERSION)
@@ -94,11 +72,26 @@ main(int argc, char **argv)
     return 1;
 
   r = &radau;
-  r_main_init(r);
+  memset(r, 0, sizeof *r);
+
+#define	RADAU_PHASE	3
+#include "radau.h"
+
   for (; argn<argc; argn++)
     r_addr_add(r, argv[argn]);
-  r_main_setup(r);
+
+  for (i=0; i<r->modules; i++)
+    if (r->module[i].init)
+      r->module[i].init(r);
+
+  printf("%d addresses\n", r_ring_len(r->ring));
+
   r_main(r);
-  return r_main_exit(r);
+
+  for (i=r->modules; --i>=0; )
+    if (r->module[i].exit)
+      r->module[i].exit(r);
+
+  return r->code;
 }
 
