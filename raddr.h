@@ -1,10 +1,19 @@
-/* Address management	*/
+/* Address management
+ *
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+ */
+
+#if	RADAU_PHASE==1
+
+struct rring	*ring;
+
+#elif	RADAU_PHASE==2
 
 #include <sys/types.h>
 #include <sys/socket.h>
 #include <netdb.h>
 
-#include "rref.h"
 #include "rring.h"
 
 static void
@@ -97,7 +106,7 @@ r_addr_add(R, const char *s)
   ret	= r_addr_get(r, s);
   if (!ret)
     {
-      WARN(r, "cannot resolve '%s'", s);
+      r->warn(r, "cannot resolve '%s'", s);
       return 1;
     }
   refs	= r_ref(r, ret, 0, r_addr_free);
@@ -129,4 +138,15 @@ r_addr_init(R)
 
   r->ring	= a;
 }
+
+static void
+r_addr_exit(R)
+{
+}
+
+#elif	RADAU_PHASE==3
+
+r->modadd(r, r_addr_init, r_addr_exit);
+
+#endif
 
