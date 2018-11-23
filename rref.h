@@ -1,4 +1,14 @@
-/* Reference counters	*/
+/* Reference counters
+ *
+ * This Works is placed under the terms of the Copyright Less License,
+ * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
+ */
+
+#if	RADAU_PHASE==1
+
+struct rref	*refs, *refc;
+
+#elif	RADAU_PHASE==2
 
 #include "rlist.h"
 
@@ -72,4 +82,20 @@ r_ref_dec(R, R_REF p)
   RLIST_DEL(p, r->refs);
   RLIST_ADD(p, r->refc);
 }
+
+static void
+r_ref_init(R)
+{
+}
+
+static void
+r_ref_exit(R)
+{
+}
+
+#elif	RADAU_PHASE==3
+
+r->modadd(r, r_ref_init, r_ref_exit);
+
+#endif
 
