@@ -79,3 +79,28 @@ see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
 
 Read: This is free as in free beer, free speech and free baby.
 
+# FAQ
+
+Why Radau?
+
+- Because I needed it.
+
+Why CLL?
+
+- Because I do not want to be bothered with any authorship quarry.  Life is too short for this.
+
+CLL is no license!
+
+- Correct.  But it legally informs you, that this here can be used as you like free of charge.
+- The only terms you need to obey for is to never add any copyright to it.  Really easy.
+
+Your name is missing.
+
+- This is by purpose.  Thanks to the CLL no name is needed.
+
+How long does the CLL hold?
+
+- As my name is not present, the short period of Urheberrecht of anonymous works applies.  
+  This is 70 years after this here was published, not 70 years after my death.  
+  This is intended, as math with lives never is a good thing.  :)
+
