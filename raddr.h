@@ -4,11 +4,13 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_addr)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
 struct rring	*ring;
 
-#elif	RADAU_PHASE==2
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 #include "rring.h"
 
@@ -105,10 +107,11 @@ r_addr_add(R, const char *s)
       r->warn(r, "cannot resolve '%s'", s);
       return 1;
     }
-  refs	= r_ref(r, ret, 0, r_addr_free);
+  refs	= r_ref(r, ret, 1, r_addr_free);
   for (; ret; ret=ret->ai_next)
     if (r_addr_valid(ret))
       r_ring_add(r, r->ring, ret, refs);
+  r_ref_dec(r, refs);
   return 0;
 }
 
@@ -117,33 +120,51 @@ r_addr_next(R)
 {
   struct addrinfo	*a;
 
-  if (!r->ring->head)
+  if (!r->ring || !r->ring->head)
     return 0;
-  a	= r->ring->head->data;
+  a		= r->ring->head->data;
   r->ring->head	= r->ring->head->next;
   return a;
 }
 
+static const char *
+r_addr_name(R, const struct addrinfo *a, int names)
+{
+  char	host[4096], port[100];
+
+  if (getnameinfo(a->ai_addr, a->ai_addrlen
+                 , host, sizeof host
+                 , port, sizeof port
+                 , names ? 0 : (NI_NUMERICHOST | NI_NUMERICSERV)
+     )           )
+    {
+      perror("name resolution");
+      return 0;
+    }
+  return r->tmp(r, tino_str_printf("%s:%s", host, port));
+}
+
 static void
-r_addr_init(R, struct rmodule *m)
+r_addr_exit(R, struct rmodule *m)
+{
+#if 0
+  r_ring_free(r->ring);
+#endif
+  r->ring	= 0;
+}
+
+static void
+r_addr_setup(R, struct rmodule *m)
 {
   R_RING	a;
+
+  m->exit	= r_addr_exit;
 
   a		= alloc0(sizeof *r);
   a->cmp	= r_addr_cmp;
 
   r->ring	= a;
 }
-
-static void
-r_addr_setup(R, struct rmodule *m)
-{
-  m->init	= r_addr_init;
-}
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_addr);
 
 #endif
 
