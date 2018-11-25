@@ -14,6 +14,8 @@
 #include "tino/fatal.h"
 
 #include "tino/strprintf.h"
+#include "tino/buf_line.h"
+#include "tino/buf_quote.h"
 
 #include "tino/dirs.h"
 
