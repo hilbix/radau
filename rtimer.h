@@ -4,12 +4,18 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_timer)
 
-int	tick;
-long	delay;
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
-#elif	RADAU_PHASE==2
+int		tick;
+unsigned long	delay;
+
+#elif	RADAU_PHASE==RADAU_PHASE_GETOPT
+
+, TINO_GETOPT_ULONGINT "t us	Microseconds between packets", &r->delay
+
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 static struct radau *_r_timer;
 
@@ -21,13 +27,13 @@ r_timer(int x)
 }
 
 static void
-r_timer_set(R, long usec)
+r_timer_set(R, unsigned long usec)
 {
   struct timeval	tv;
   struct itimerval	t;
 
-  tv.tv_sec	= usec/1000000;
-  tv.tv_usec	= usec%1000000;
+  tv.tv_sec	= usec/1000000l;
+  tv.tv_usec	= usec%1000000l;
 
   t.it_value	= tv;
   t.it_interval	= tv;
@@ -40,6 +46,8 @@ static void
 r_timer_init(R, RMODULE)
 {
   FATAL(_r_timer!=r);
+  if (!r->delay)
+    r->delay	= 1000000l;
   r_timer_set(r, r->delay);
 }
 
@@ -57,12 +65,7 @@ r_timer_setup(R, RMODULE)
   m->exit	= r_timer_exit;
 
   _r_timer	= r;
-  r->delay	= 1000000l;
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_timer);
 
 #endif
 
