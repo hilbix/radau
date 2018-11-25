@@ -37,27 +37,28 @@ struct rring
 
 typedef	struct rring	*R_RING;
 
-/* Move the compare function to the ring?	*/
 static void *
 r_ring_add(R, R_RING ring, void *data, R_REF ref)
 {
   R_ELEM	p;
 
   FATAL(!ref);
+
   /* This could be speed up with hashing, but for this we need some additional hashing function	*/
-  if ((p=ring->head)!=0)
+  if ((p=ring->head)!=0 && ring->cmp)
     do
       {
         if (!ring->cmp(r, data, p->data))
-          {
-            r_ref_inc(r, ref);
-            return p->data;
-          }
+          return p->data;
       } while ((p=p->next)!=ring->head);
+
   /* Allocate new one	*/
+
+  r_ref_inc(r, ref);
 
   p		= alloc0(sizeof *p);
   p->data	= data;
+  p->ref	= ref;
 
   RRING_ADD(p, ring->head);
 
