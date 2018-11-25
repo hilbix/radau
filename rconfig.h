@@ -13,20 +13,6 @@ const char	*configdir, *configname, *configuser;
 #elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 #include "rconfigdir.h"
-#include "rconfigread.h"
-#include "rconfigwrite.h"
-
-static void
-r_config_read(R)
-{
-  r_config_read_wrap(r, r_config_read_do);
-}
-
-static void
-r_config_write(R)
-{
-  r_config_write_wrap(r, r_config_write_do);
-}
 
 static void
 r_config_init(R, RMODULE)
