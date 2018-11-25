@@ -28,6 +28,7 @@ struct rlist
 struct relem
   {
     R_ELEM	next, last;
+    R_REF	ref;
     void	*data;
   };
 
