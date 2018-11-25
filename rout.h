@@ -10,8 +10,6 @@ int	sock;
 
 #elif	RADAU_PHASE==2
 
-#include <unistd.h>
-
 static void
 r_out(R)
 {
@@ -33,21 +31,28 @@ r_out(R)
 }
 
 static void
-r_out_init(R)
+r_out_init(R, RMODULE)
 {
   FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
 }
 
 static void
-r_out_exit(R)
+r_out_exit(R, RMODULE)
 {
   tino_file_closeI(r->sock);
   r->sock	= 0;
 }
 
+static void
+r_out_setup(R, RMODULE)
+{
+  m->init	= r_out_init;
+  m->exit	= r_out_exit;
+}
+
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_out_init, r_out_exit);
+R_MODULE(r_out);
 
 #endif
 
