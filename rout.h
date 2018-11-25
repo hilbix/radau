@@ -4,26 +4,40 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_out)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
 int	sock;
 
-#elif	RADAU_PHASE==2
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
+
+static void
+r_out_open(R)
+{
+  FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
+}
+
+static void
+r_out_close(R)
+{
+  tino_file_closeE(r->sock);
+  r->sock	= -1;
+}
 
 static void
 r_out(R)
 {
   const struct addrinfo	*a;
-  char			host[4096], serv[100];
 
   a	= r_addr_next(r);
-
-  if (getnameinfo(a->ai_addr, a->ai_addrlen, host, sizeof host, serv, sizeof serv, NI_NUMERICHOST | NI_NUMERICSERV))
+  if (!a)
     {
-      perror("name resolution");
+      r->err(r, "no addresses given");
+      r_out_close(r);
       return;
     }
-  printf("%5s %s\n", serv, host);
+  printf("%s\n", r_addr_name(r, a, 0));
   fflush(stdout);
 #if 0
       if (sendto(fd, text, len, 0, ret->ai_addr, ret->ai_addrlen)!=len)
@@ -33,14 +47,13 @@ r_out(R)
 static void
 r_out_init(R, RMODULE)
 {
-  FATAL((r->sock = socket(AF_INET, SOCK_DGRAM, 0))<0);
+  r_out_open(r);
 }
 
 static void
 r_out_exit(R, RMODULE)
 {
-  tino_file_closeI(r->sock);
-  r->sock	= 0;
+  r_out_close(r);
 }
 
 static void
@@ -50,9 +63,7 @@ r_out_setup(R, RMODULE)
   m->exit	= r_out_exit;
 }
 
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_out);
+#elif	RADAU_PHASE==RADAU_PHASE_GETOPT
 
 #endif
 
