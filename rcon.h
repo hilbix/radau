@@ -8,7 +8,7 @@ RADAU_MODULE(r_con)
 
 #if	RADAU_PHASE==0
 
-typedef void R_CON(R, const char *msg, ...);                                                        
+typedef void R_CON(R, const char *msg, ...);
 
 #elif	RADAU_PHASE==RADAU_PHASE_CONFIG
 
