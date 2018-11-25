@@ -1,7 +1,7 @@
 # Makefile automatically generated, do not edit!
 # This output (only this Makefile) is Public Domain.
 #
-#@MD5TINOIGN@ Creation date: Sun Nov 25 10:34:52 CET 2018
+#@MD5TINOIGN@ Creation date: Sun Nov 25 14:44:27 CET 2018
 #
 # This file is based on following files:
 #@MD5TINOIGN@ 1: Makefile.tino
@@ -177,6 +177,6 @@ $(PROG1).o:  radau.c tino/dirty.h tino/file.h tino/sysfix.h \
  tino/alloc.h tino/str.h tino/dirs.h tino/filetool.h tino/file.h \
  tino/getopt.h radau_version.h radau.h rmodule.h rref.h raddr.h rtimer.h \
  rcon.h rpacket.h rin.h rout.h rmain.h rconfig.h rlist.h rring.h \
- rconfigdir.h rconfigread.h rconfigwrite.h
+ rconfigdir.h
 
 # end
