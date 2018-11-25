@@ -10,10 +10,6 @@ struct rring	*ring;
 
 #elif	RADAU_PHASE==2
 
-#include <sys/types.h>
-#include <sys/socket.h>
-#include <netdb.h>
-
 #include "rring.h"
 
 static void
@@ -129,7 +125,7 @@ r_addr_next(R)
 }
 
 static void
-r_addr_init(R)
+r_addr_init(R, struct rmodule *m)
 {
   R_RING	a;
 
@@ -140,13 +136,14 @@ r_addr_init(R)
 }
 
 static void
-r_addr_exit(R)
+r_addr_setup(R, struct rmodule *m)
 {
+  m->init	= r_addr_init;
 }
 
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_addr_init, r_addr_exit);
+R_MODULE(r_addr);
 
 #endif
 
