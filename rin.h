@@ -4,23 +4,22 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_in)
 
-#elif	RADAU_PHASE==2
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
+
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 static void
 r_in(R)
 {
+  pause();
 }
 
 static void
 r_in_setup(R, RMODULE)
 {
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_in);
 
 #endif
 
