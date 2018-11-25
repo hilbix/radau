@@ -33,10 +33,11 @@ r_out(R)
   a	= r_addr_next(r);
   if (!a)
     {
-      r->err(r, "no addresses given");
+      r->err(r, "no addresses left");
       r_out_close(r);
       return;
     }
+
   printf("%s\n", r_addr_name(r, a, 0));
   fflush(stdout);
 #if 0
