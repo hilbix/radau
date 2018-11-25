@@ -1,7 +1,7 @@
 # Makefile automatically generated, do not edit!
 # This output (only this Makefile) is Public Domain.
 #
-#@MD5TINOIGN@ Creation date: Sun Nov 25 07:55:07 CET 2018
+#@MD5TINOIGN@ Creation date: Sun Nov 25 10:34:52 CET 2018
 #
 # This file is based on following files:
 #@MD5TINOIGN@ 1: Makefile.tino
@@ -173,10 +173,10 @@ $(PROG1):	$(PROG1).o $(OBJS) $(LIBS)
 $(PROG1).o:  radau.c tino/dirty.h tino/file.h tino/sysfix.h \
  tino/sysfix_cygwin.h tino/sysfix_diet.h tino/sysfix_linux.h \
  tino/sysfix_osx.h tino/type.h tino/alloc.h tino/debug.h tino/err.h \
- tino/fatal.h tino/ex.h tino/arg.h tino/fatal.h tino/dirs.h \
- tino/filetool.h tino/file.h tino/alloc.h tino/str.h tino/getopt.h \
- radau_version.h radau.h rmodule.h rref.h raddr.h rtimer.h rcon.h \
- rpacket.h rin.h rout.h rmain.h rconfig.h rlist.h rring.h rconfigdir.h \
- rconfigread.h rconfigwrite.h
+ tino/fatal.h tino/ex.h tino/arg.h tino/fatal.h tino/strprintf.h \
+ tino/alloc.h tino/str.h tino/dirs.h tino/filetool.h tino/file.h \
+ tino/getopt.h radau_version.h radau.h rmodule.h rref.h raddr.h rtimer.h \
+ rcon.h rpacket.h rin.h rout.h rmain.h rconfig.h rlist.h rring.h \
+ rconfigdir.h rconfigread.h rconfigwrite.h
 
 # end
