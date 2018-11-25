@@ -4,8 +4,6 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#include "tino/dirs.h"
-
 static TINO_DIRS *
 r_config_base(R, int write)
 {
