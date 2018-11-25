@@ -18,6 +18,7 @@
 #define	MOD		_lkdfadkasldkp23sde0923_
 
 struct rmodule;
+struct rconfig_write;
 
 typedef	void rmodule_fn(R, RMODULE);
 
@@ -25,6 +26,8 @@ struct rmodule
   {
     const char	*name;
     rmodule_fn	*setup, *init, *exit;
+    int		(*read)(R, const char *key, const char *val);
+    void	(*write)(R, struct rconfig_write *);
   };
 
 static struct MOD
@@ -76,6 +79,29 @@ r_module_exit(R)
   for (i=MOD.cnt; --i>=0; )
     if ((m = &MOD.data[i])->exit)
       m->exit(r, m);
+}
+
+static int
+r_module_config_read(R, const char *module, const char *key, const char *value)
+{
+  RMODULE;
+  int	i;
+
+  for (m=MOD.data, i=MOD.cnt; --i>=0; m++)
+    if (!strcmp(m->name, module))
+      return m->read ? m->read(r, key, value) : 1;
+  return -1;
+}
+
+static void
+r_module_config_write(R, struct rconfig_write *c)
+{
+  RMODULE;
+  int	i;
+
+  for (m=MOD.data, i=MOD.cnt; --i>=0; m++)
+    if (m->write)
+      m->write(r, c);
 }
 
 #undef	MOD
