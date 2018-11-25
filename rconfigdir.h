@@ -45,16 +45,37 @@ r_config_path(R, int write)
   return tino_dirs_sub(r_config_base(r, write), 1, r->configdir);
 }
 
+static int
+r_config_read_try(R, const char *name, void (*reader)(R, FILE *, const char *))
+{
+  FILE	*fd;
+  int	err;
+
+  if (!name || (fd = fopen(name, "rt"))==0)
+    {
+      r->debuger(r, "config %s", name);
+      return 0;
+    }
+
+  reader(r, fd, name);
+  err	=  ferror(fd);
+  err	|= fclose(fd);
+  if (err)
+    return r->err(r, "reading config %s", name), -1;
+  return r->info(r, "loaded config %s", name), 1;
+}
+
 static void
 r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
 {
   TINO_DIRS	*dirs;
   const char	*name;
-  FILE		*fd;
 
   dirs	= r_config_path(r, 0);
   for (;;)
     {
+      int	got;
+
       if ((name = tino_dirs_path(dirs, 1, r->configname))==0)
         {
           tino_dirs_free(dirs);
@@ -62,22 +83,14 @@ r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
           reader(r, NULL, r->configname);
           return;
         }
-      if ((fd = fopen(name, "rt"))!=0)
+      if ((got = r_config_read_try(r, name, reader)) != 0)
         {
-          int	err;
-
-          reader(r, fd, name);
-          err	=  ferror(fd);
-          err	|= fclose(fd);
-          if (err)
-            r->err(r, "reading config %s", name);
-          else
-            r->info(r, "loaded config %s", name);
+          if (got>0)
+            r_config_read_try(r, tino_dirs_path(dirs, 2, r->configname, r->configuser), reader);
           tino_dirs_free(dirs);
           return;
         }
-      else
-        r->debuger(r, "config %s", name);
+
       tino_dirs_pull(dirs, 1);
       tino_dirs_gc(dirs);
     }
