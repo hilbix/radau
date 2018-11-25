@@ -27,7 +27,7 @@ r_config_write(R)
 }
 
 static void
-r_config_init(R)
+r_config_init(R, RMODULE)
 {
   r->configdir	= "radau";
   r->configname	= "radau.conf";
@@ -35,14 +35,21 @@ r_config_init(R)
 }
 
 static void
-r_config_exit(R)
+r_config_exit(R, RMODULE)
 {
   r_config_write(r);
 }
 
+static void
+r_config_setup(R, RMODULE)
+{
+  m->init	= r_config_init;
+  m->exit	= r_config_exit;
+}
+
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_config_init, r_config_exit);
+R_MODULE(r_config);
 
 #endif
 
