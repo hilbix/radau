@@ -23,6 +23,7 @@ typedef	void rmodule_fn(R, RMODULE);
 
 struct rmodule
   {
+    const char	*name;
     rmodule_fn	*setup, *init, *exit;
   };
 
@@ -33,10 +34,15 @@ static struct MOD
   } MOD;
 
 static void
-r_module(R, rmodule_fn setup)
+r_module(R, const char *name, rmodule_fn setup)
 {
+  RMODULE;
+
   FATAL(MOD.cnt >= R_MODULE_MAX);
-  MOD.data[MOD.cnt++].setup	= setup;
+
+  m		= &MOD.data[MOD.cnt++];
+  m->name	= name;
+  m->setup	= setup;
 }
 
 static void
@@ -76,7 +82,7 @@ r_module_exit(R)
 
 #elif	RADAU_PHASE==RADAU_PHASE_MODULE
 
-#define	RADAU_MODULE(name)	r_module(r, name ## _ ## setup);
+#define	RADAU_MODULE(name)	r_module(r, #name, r_ ## name ## _ ## setup);
 
 #endif
 
