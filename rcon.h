@@ -14,10 +14,6 @@ void (*info)(R, const char *msg, ...);
 
 #elif	RADAU_PHASE==2
 
-#include <stdlib.h>
-#include <stdarg.h>
-#include <errno.h>
-
 static void
 r_con_vout(R, const char *what, const char *msg, va_list list, int e)
 {
@@ -49,20 +45,15 @@ r_con_info(R, const char *msg, ...)
 }
 
 static void
-r_con_init(R)
+r_con_setup(R, RMODULE)
 {
-}
-
-static void
-r_con_exit(R)
-{
+  r->warn	= r_con_warn;
+  r->info	= r_con_info;
 }
 
 #elif	RADAU_PHASE==3
 
-r->warn	= r_con_warn;
-r->info	= r_con_info;
-r->modadd(r, r_con_init, r_con_exit);
+R_MODULE(r_con);
 
 #endif
 
