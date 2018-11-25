@@ -4,7 +4,9 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_packet)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
 #define R_PACKET_HD_IP_MIN	20
 #define R_PACKET_HD_IP_MAX	60
@@ -16,16 +18,12 @@
 
 char	packet[R_PACKET_IP_MAX_SZ];
 
-#elif	RADAU_PHASE==2
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 static void
 r_packet_setup(R, RMODULE)
 {
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_packet);
 
 #endif
 
