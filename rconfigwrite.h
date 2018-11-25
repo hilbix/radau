@@ -7,6 +7,6 @@
 static void
 r_config_write_do(R, FILE *fd, const char *name)
 {
-  TINO_XXX;
+  
 }
 
