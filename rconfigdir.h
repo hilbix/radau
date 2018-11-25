@@ -4,8 +4,14 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
+struct rconfig_write
+  {
+    FILE	*fd;
+    const char	*name;
+  };
+
 static TINO_DIRS *
-r_config_base(R, int write)
+r_config_dirs(R, int write)
 {
   TINO_DIRS	*dirs;
 
@@ -42,11 +48,11 @@ static TINO_DIRS *
 r_config_path(R, int write)
 {
   /* all is stored in the application subdirectory "radau"	*/
-  return tino_dirs_sub(r_config_base(r, write), 1, r->configdir);
+  return tino_dirs_sub(r_config_dirs(r, write), 1, r->configdir);
 }
 
 static int
-r_config_read_try(R, const char *name, void (*reader)(R, FILE *, const char *))
+r_config_read_try(R, const char *name)
 {
   FILE	*fd;
   int	err;
@@ -57,7 +63,10 @@ r_config_read_try(R, const char *name, void (*reader)(R, FILE *, const char *))
       return 0;
     }
 
+#if 0
   reader(r, fd, name);
+#endif
+
   err	=  ferror(fd);
   err	|= fclose(fd);
   if (err)
@@ -66,7 +75,7 @@ r_config_read_try(R, const char *name, void (*reader)(R, FILE *, const char *))
 }
 
 static void
-r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
+r_config_read(R)
 {
   TINO_DIRS	*dirs;
   const char	*name;
@@ -80,13 +89,12 @@ r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
         {
           tino_dirs_free(dirs);
           r->info(r, "config not found: %s", r->configname);
-          reader(r, NULL, r->configname);
           return;
         }
-      if ((got = r_config_read_try(r, name, reader)) != 0)
+      if ((got = r_config_read_try(r, name)) != 0)
         {
           if (got>0)
-            r_config_read_try(r, tino_dirs_path(dirs, 2, r->configname, r->configuser), reader);
+            r_config_read_try(r, tino_dirs_path(dirs, 2, r->configname, r->configuser));
           tino_dirs_free(dirs);
           return;
         }
@@ -97,12 +105,13 @@ r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
 }
 
 static void
-r_config_write_wrap(R, void (*writer)(R, FILE *, const char *name))
+r_config_write(R)
 {
   TINO_DIRS	*dirs;
   const char	*dir, *name1, *name2;
   FILE		*fd;
   int		err;
+  struct rconfig_write	c;
 
   dirs	= r_config_path(r, 1);
   dir	= tino_dirs_path(dirs, 0);
@@ -118,12 +127,15 @@ r_config_write_wrap(R, void (*writer)(R, FILE *, const char *name))
       if ((fd = fopen(name2, "w+t"))==0)
         {
           r->err(r, "cannot write config %s", name2);
-          writer(r, NULL, name2);
           tino_dirs_free(dirs);
           return;
         }
     }
-  writer(r, fd, name2);
+
+  c.name	= name2;
+  c.fd		= fd;
+  r_module_config_write(r, &c);
+
   err	=  ferror(fd);
   err	|= fclose(fd);
   if (err)
