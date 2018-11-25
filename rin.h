@@ -8,26 +8,19 @@
 
 #elif	RADAU_PHASE==2
 
-#include <unistd.h>
-
 static void
 r_in(R)
 {
 }
 
 static void
-r_in_init(R)
-{
-}
-
-static void
-r_in_exit(R)
+r_in_setup(R, RMODULE)
 {
 }
 
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_in_init, r_in_exit);
+R_MODULE(r_in);
 
 #endif
 
