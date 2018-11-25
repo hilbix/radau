@@ -4,15 +4,17 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_ref)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
 struct rref	*refs, *refc;
 
-#elif	RADAU_PHASE==2
-
-#include "rlist.h"
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 typedef	struct rref	*R_REF;
+
+#include "rlist.h"
 
 struct rref
   {
@@ -87,10 +89,6 @@ static void
 r_ref_setup(R, RMODULE)
 {
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_ref);
 
 #endif
 
