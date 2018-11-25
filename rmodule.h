@@ -4,9 +4,13 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+#if 0
+  R_MODULE(r_module)
+#endif
 
-#elif	RADAU_PHASE==2
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
+
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 #define	RMODULE	struct rmodule *m
 
@@ -52,7 +56,8 @@ r_module_init(R)
   int		i;
 
   for (m=MOD.data, i=MOD.cnt; --i>=0; m++)
-    m->init(r, m);
+    if (m->init)
+      m->init(r, m);
 }
 
 static void
@@ -61,19 +66,17 @@ r_module_exit(R)
   RMODULE;
   int		i;
 
-  for (m=MOD.data, i=MOD.cnt; --i>=0; m++)
-    m->exit(r, m);
+  /* backwards	*/
+  for (i=MOD.cnt; --i>=0; )
+    if ((m = &MOD.data[i])->exit)
+      m->exit(r, m);
 }
 
 #undef	MOD
 
-#elif	RADAU_PHASE==3
+#elif	RADAU_PHASE==RADAU_PHASE_MODULE
 
-#define	R_MODULE(name)	r_module(r, name ## _ ## setup)
-
-#if 0
-  RMODULE(r_module);
-#endif
+#define	RADAU_MODULE(name)	r_module(r, name ## _ ## setup);
 
 #endif
 
