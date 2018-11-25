@@ -84,18 +84,13 @@ r_ref_dec(R, R_REF p)
 }
 
 static void
-r_ref_init(R)
-{
-}
-
-static void
-r_ref_exit(R)
+r_ref_setup(R, RMODULE)
 {
 }
 
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_ref_init, r_ref_exit);
+R_MODULE(r_ref);
 
 #endif
 
