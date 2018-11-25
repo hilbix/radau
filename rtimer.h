@@ -11,9 +11,6 @@ long	delay;
 
 #elif	RADAU_PHASE==2
 
-#include <signal.h>
-#include <sys/time.h>
-
 static struct radau *_r_timer;
 
 static void
@@ -40,24 +37,32 @@ r_timer_set(R, long usec)
 }
 
 static void
-r_timer_init(R)
+r_timer_init(R, RMODULE)
 {
   FATAL(_r_timer!=r);
   r_timer_set(r, r->delay);
 }
 
 static void
-r_timer_exit(R)
+r_timer_exit(R, RMODULE)
 {
   FATAL(_r_timer!=r);
   r_timer_set(r, 0l);
 }
 
+static void
+r_timer_setup(R, RMODULE)
+{
+  m->init	= r_timer_init;
+  m->exit	= r_timer_exit;
+
+  _r_timer	= r;
+  r->delay	= 1000000l;
+}
+
 #elif	RADAU_PHASE==3
 
-_r_timer	= r;
-r->delay	= 1000000l;
-r->modadd(r, r_timer_init, r_timer_exit);
+R_MODULE(r_timer);
 
 #endif
 
