@@ -154,11 +154,34 @@ r_addr_exit(R, struct rmodule *m)
 }
 
 static void
+r_addr_read(R, struct rconfig_read *c)
+{
+  c->read(c, "ip", r_addr_add);
+}
+
+static void
+r_addr_write(R, struct rconfig_write *c)
+{
+  R_ELEM	f, p;
+
+  f	= r->ring->head;
+  if (!f)
+    return;
+  p	= f;
+  do
+    {
+      c->write(c, "ip", r_addr_name(r, p->data, 0));
+    } while ((p=p->next) != f);
+}
+
+static void
 r_addr_setup(R, struct rmodule *m)
 {
   R_RING	a;
 
   m->exit	= r_addr_exit;
+  m->read	= r_addr_read;
+  m->write	= r_addr_write;
 
   a		= alloc0(sizeof *r);
   a->cmp	= r_addr_cmp;
