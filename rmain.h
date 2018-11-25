@@ -6,11 +6,9 @@
 
 #if	RADAU_PHASE==1
 
-int code;
+int main_returncode;
 
 #elif	RADAU_PHASE==2
-
-#include <unistd.h>
 
 static void
 r_main(R)
@@ -24,18 +22,13 @@ r_main(R)
 }
 
 static void
-r_main_init(R)
-{
-}
-
-static void
-r_main_exit(R)
+r_main_setup(R, RMODULE)
 {
 }
 
 #elif	RADAU_PHASE==3
 
-r->modadd(r, r_main_init, r_main_exit);
+R_MODULE(r_main);
 
 #endif
 
