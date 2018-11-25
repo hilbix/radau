@@ -7,6 +7,6 @@
 static void
 r_config_read_do(R, FILE *fd, const char *name)
 {
-  000;
+  TINO_XXX;
 }
 
