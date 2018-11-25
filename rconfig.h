@@ -4,11 +4,11 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-RADAU_MODULE(r_config)
+RADAU_MODULE(config)
 
 #if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
-const char *configdir, *configname, *configuser;
+const char	*configdir, *configname, *configuser;
 
 #elif	RADAU_PHASE==RADAU_PHASE_CODE
 
