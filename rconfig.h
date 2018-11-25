@@ -8,7 +8,7 @@ RADAU_MODULE(r_config)
 
 #if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
-const char *configdir, *configname;
+const char *configdir, *configname, *configuser;
 
 #elif	RADAU_PHASE==RADAU_PHASE_CODE
 
@@ -33,6 +33,7 @@ r_config_init(R, RMODULE)
 {
   r->configdir	= "radau";
   r->configname	= "radau.conf";
+  r->configuser	= ".local";
   r_config_read(r);
   r_config_write(r);
 }
