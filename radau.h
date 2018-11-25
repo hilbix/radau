@@ -2,6 +2,8 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
+#include "rmodule.h"
+
 #include "rref.h"
 
 #include "raddr.h"
@@ -9,6 +11,8 @@
 #include "rtimer.h"
 
 #include "rcon.h"
+
+#include "rpacket.h"
 #include "rin.h"
 #include "rout.h"
 
