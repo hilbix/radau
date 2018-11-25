@@ -4,11 +4,13 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_config)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
 
 const char *configdir, *configname;
 
-#elif	RADAU_PHASE==2
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
 
 #include "rconfigdir.h"
 #include "rconfigread.h"
@@ -32,6 +34,7 @@ r_config_init(R, RMODULE)
   r->configdir	= "radau";
   r->configname	= "radau.conf";
   r_config_read(r);
+  r_config_write(r);
 }
 
 static void
@@ -46,10 +49,6 @@ r_config_setup(R, RMODULE)
   m->init	= r_config_init;
   m->exit	= r_config_exit;
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_config);
 
 #endif
 
