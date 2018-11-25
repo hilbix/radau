@@ -4,11 +4,33 @@
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
  */
 
-#if	RADAU_PHASE==1
+RADAU_MODULE(r_main)
+
+#if	RADAU_PHASE==RADAU_PHASE_CONFIG
+
+#define	R_MAIN_MAXTMP	1000
 
 int main_returncode;
+int		tmp_count;
+const char *	_tmp[R_MAIN_MAXTMP];
+const char *(*	tmp)(R, const char *);
 
-#elif	RADAU_PHASE==2
+#elif	RADAU_PHASE==RADAU_PHASE_CODE
+
+static const char *
+r_main_tmp(R, const char *s)
+{
+  FATAL(r->tmp_count >= R_MAIN_MAXTMP);
+  r->_tmp[r->tmp_count++]	= s;
+  return s;
+}
+
+static void
+r_main_cleanup(R)
+{
+  while (r->tmp_count>0)
+    tino_free_constO(r->_tmp[--r->tmp_count]);
+}
 
 static void
 r_main(R)
@@ -18,17 +40,15 @@ r_main(R)
     {
       r_in(r);
       r_out(r);
+      r_main_cleanup(r);
     }
 }
 
 static void
 r_main_setup(R, RMODULE)
 {
+  r->tmp	= r_main_tmp;
 }
-
-#elif	RADAU_PHASE==3
-
-R_MODULE(r_main);
 
 #endif
 
