@@ -1,4 +1,4 @@
-/* Config management
+/* Config directory handling
  *
  * This Works is placed under the terms of the Copyright Less License,
  * see file COPYRIGHT.CLL.  USE AT OWN RISK, ABSOLUTELY NO WARRANTY.
@@ -39,10 +39,10 @@ r_config_base(R, int write)
 }
 
 static TINO_DIRS *
-r_config_path(R, int writer)
+r_config_path(R, int write)
 {
   /* all is stored in the application subdirectory "radau"	*/
-  return tino_dirs_sub(r_config_base(r, writer), 1, r->configdir);
+  return tino_dirs_sub(r_config_base(r, write), 1, r->configdir);
 }
 
 static void
@@ -70,12 +70,14 @@ r_config_read_wrap(R, void (*reader)(R, FILE *, const char *))
           err	=  ferror(fd);
           err	|= fclose(fd);
           if (err)
-            r->warn(r, "error while loading config: %s", name);
+            r->err(r, "reading config %s", name);
           else
-            r->info(r, "config loaded: %s", name);
+            r->info(r, "loaded config %s", name);
           tino_dirs_free(dirs);
           return;
         }
+      else
+        r->debuger(r, "config %s", name);
       tino_dirs_pull(dirs, 1);
       tino_dirs_gc(dirs);
     }
@@ -97,11 +99,12 @@ r_config_write_wrap(R, void (*writer)(R, FILE *, const char *name))
   if ((fd = fopen(name2, "w+t"))==0)
     {
       if (mkdir(dir, 0755))
-        r->warn(r, "cannot create dir: %s", dir);
+        r->err(r, "cannot create dir %s", dir);
       else
-        r->info(r, "created dir: %s", dir);
+        r->verbose(r, "created dir %s", dir);
       if ((fd = fopen(name2, "w+t"))==0)
         {
+          r->err(r, "cannot write config %s", name2);
           writer(r, NULL, name2);
           tino_dirs_free(dirs);
           return;
