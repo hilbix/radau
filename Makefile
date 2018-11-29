@@ -1,7 +1,7 @@
 # Makefile automatically generated, do not edit!
 # This output (only this Makefile) is Public Domain.
 #
-#@MD5TINOIGN@ Creation date: Sun Nov 25 22:37:20 CET 2018
+#@MD5TINOIGN@ Creation date: Thu Nov 29 21:05:20 CET 2018
 #
 # This file is based on following files:
 #@MD5TINOIGN@ 1: Makefile.tino
@@ -109,7 +109,7 @@ Makefile:	Makefile.md5
 	$(TOUCH) Makefile
 
 Makefile.md5:	$(VERSIONFILE).$(VERSIONEXT) always
-	@$(GAWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
+	@[ -z '$(HERE)' ] || $(GAWK) -vHERE="$(HERE)" -vMAKE="$(MAKE)" -vTINOCOPY="$(TINOCOPY)" 'BEGIN { \
 	if ((getline < "tino/Makefile")>0 && \
 	    (getline < "tino/Makefile.proto")>0 && \
 	    (getline < "tino/Makefile.awk")>-1) \
@@ -175,8 +175,9 @@ $(PROG1).o:  radau.c tino/dirty.h tino/file.h tino/sysfix.h \
  tino/sysfix_osx.h tino/type.h tino/alloc.h tino/debug.h tino/err.h \
  tino/fatal.h tino/ex.h tino/arg.h tino/fatal.h tino/strprintf.h \
  tino/alloc.h tino/str.h tino/buf_line.h tino/buf.h tino/file.h \
- tino/codec.h tino/buf_quote.h tino/dirs.h tino/filetool.h tino/getopt.h \
- radau_version.h radau.h rmodule.h rref.h raddr.h rtimer.h rcon.h \
- rpacket.h rin.h rout.h rmain.h rconfig.h rlist.h rring.h
+ tino/codec.h tino/buf_quote.h tino/md5.h tino/dirs.h tino/filetool.h \
+ tino/signals.h tino/getopt.h radau_version.h radau.h rmodule.h rref.h \
+ raddr.h rtimer.h rcon.h rpacket.h rin.h rout.h rmain.h rconfig.h rlist.h \
+ rring.h
 
 # end
