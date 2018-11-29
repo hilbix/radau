@@ -17,7 +17,10 @@
 #include "tino/buf_line.h"
 #include "tino/buf_quote.h"
 
+#include "tino/md5.h"
 #include "tino/dirs.h"
+
+#include "tino/signals.h"
 
 #include "tino/getopt.h"
 
@@ -27,7 +30,9 @@
 
 #include <unistd.h>
 #include <signal.h>
+#include <time.h>
 #include <sys/time.h>
+#include <sys/utsname.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
