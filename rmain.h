@@ -32,14 +32,36 @@ r_main_cleanup(R)
     tino_free_constO(r->_tmp[--r->tmp_count]);
 }
 
+static volatile int	r_main_loop;
+
+static void
+r_main_terminate()
+{
+  r_main_loop	= 0;
+}
+
+static void
+r_main_term(int sig)
+{
+  tino_sigset(sig, r_main_terminate);
+  tino_sigfix(sig);
+}
+
 static void
 r_main(R)
 {
   r->info(r, "%d addresses", r_ring_len(r->ring));
-  while (r->sock>=0)                                                                                
+  tino_sigintr(SIGALRM);
+  r_main_loop	= 1;
+  r_main_term(SIGHUP);
+  r_main_term(SIGINT);
+  r_main_term(SIGQUIT);
+  r_main_term(SIGTERM);
+  while (r->sock>=0 && r_main_loop)                                                                                
     {
       r_in(r);
-      r_out(r);
+      if (r->sock>=0)
+        r_out(r);
       r_main_cleanup(r);
     }
 }
