@@ -298,7 +298,7 @@ R_config_save(R, int force)
             if (n)
               {
                 fprintf(fd, "%s\n", n);
-		cnt++;
+                cnt++;
                 if (ferror(fd))
                   break;
               }
