@@ -1,3 +1,7 @@
+/* LIBS:	openssl ntru
+ * DEBIAN:	libntru-0.5-dev libmsgpack-dev
+ */
+
 #define	GNU_SOURCE
 
 #include <stdio.h>
@@ -5,10 +9,17 @@
 #include <string.h>
 #include <stdlib.h>
 #include <errno.h>
+#include <ctype.h>
 
 #include <sys/types.h>
 #include <sys/socket.h>
+
 #include <netdb.h>
+#include <ifaddrs.h>
+
+#include "mem-tool.h"
+#include "str-tool.h"
+#include "pki-tool.h"
 
 #define	RADAR_CONFIG	".radar.conf"
 
@@ -19,6 +30,7 @@ struct radar
     const char		*config;
     int			dstcnt;
     Rdest		*dst;
+    PKI			pki;
     int			code;
     unsigned		allocated:1;
     unsigned		configproblems:1;
@@ -75,75 +87,13 @@ Rlog(R, const char *s, ...)
   va_end(list);
 }
 
-static void *
-R_alloc(R, void *ptr, size_t len)
-{
-  void *r = ptr ? realloc(ptr, len) : malloc(len);
-  if (!r)
-    Roops(_, "out of memory");
-  return r;
-}
-
-static void *
-Ralloc(R, size_t len)
-{
-  return R_alloc(_, NULL, len);
-}
-
-#define	Realloc(_,P,N)	do { P = R_alloc(_, (P), (N)*sizeof *(P)); } while (0)
-#define	Rfree(_,P)	R_free(_,(void **)&(P))
-
 static void
-R_free(R, void **p)
+R_get_local(R)
 {
-  if (!p || !*p) return;
-  free(*p);
-  *p	= 0;
-}
+  struct ifaddrs *list;
 
-static char *
-Rdup(R, const char *s)
-{
-  size_t	len;
-  char		*r;
-
-  len	= strlen(s)+1;
-  r	= Ralloc(_, len);
-  memcpy(r, s, len);		/* strncpy() destroyed due to completely insane compiler warnings	*/
-  r[len-1]	= 0;
-  return r;
-}
-
-static char *
-Rcat(R, const char *s, const char *a)
-{
-  size_t	ls, la;
-  char		*r;
-
-  ls	= strlen(s);
-  la	= strlen(a)+1;
-  r	= Ralloc(_, ls+la);
-  memcpy(r, s, ls);		/* strncpy() destroyed due to completely insane compiler warnings	*/
-  memcpy(r+ls, a, la);		/* strncpy() destroyed due to completely insane compiler warnings	*/
-  r[ls+la-1]	= 0;
-  return r;
-}
-
-static char *
-Rcats(R, const char *s, ...)
-{
-  va_list	list;
-  char		*x, *r;
-
-  x	= Rdup(_, "");
-  for (va_start(list, s); s; s=va_arg(list, const char *))
-    {
-      r	= Rcat(_, x, s);
-      Rfree(_, x);
-      x	= r;
-    }
-  va_end(list);
-  return x;
+  if (getifaddrs(&list))
+    Roops(_, "cannot get list of local interfaces");
 }
 
 static struct radar *
@@ -152,10 +102,12 @@ R_init(R)
   int	allocated = !_;
 
   if (allocated)
-    _	= Ralloc(_, sizeof *_);
+    _	= Malloc(sizeof *_);
   memset(_, 0, sizeof *_);
   _->allocated	= allocated;
-  _->config	= Rdup(_, RADAR_CONFIG);
+  _->config	= Mdups(RADAR_CONFIG);
+  R_get_local(_);
+  _->pki	= PKI_init(Malloc(sizeof *_->pki), _);
   return _;
 }
 
@@ -165,14 +117,16 @@ R_exit(R)
   int	code;
 
   code	= _->code;
-  Rfree(_, _->config);
+  PKI_free(_->pki);
+  MFREE(_->pki);
+  MFREE(_->config);
   return code;
 }
 
 static Rdest
 Raddr(R, const char *s, int bind)
 {
-  char *h	= Rdup(_, s);
+  char *h	= Mdups(s);
   char *p	= strrchr(h, ':');
   struct addrinfo	*a, o;
   Rdest		d;
@@ -193,13 +147,13 @@ Raddr(R, const char *s, int bind)
 
   if (getaddrinfo(h, p, &o, &a))
     {
-      Rwarn(_, "cannot get address %s", s);
-      Rfree(_, h);
+      Rwarn(_, "cannot get address %s (%s %s)", s, h, p);
+      MFREE(h);
       return 0;
     }
-  d	= Ralloc(_, sizeof *d);
+  d	= Malloc(sizeof *d);
   d->a	= a;
-  Rfree(_, h);
+  MFREE(h);
   return d;
 }
 
@@ -212,10 +166,14 @@ Raddr_add(R, const char *s, int bind)
   if (!x) return;
 
   n	= ++_->dstcnt;
-  Realloc(_, _->dst, n);
+  Mrealloc(_->dst, n);
   _->dst[n-1]	= x;
 }
 
+/* config:
+ *
+ * IP:port	CommonSecret
+ */
 static void
 R_config(R, const char * const *argv)
 {
@@ -235,6 +193,12 @@ R_config(R, const char * const *argv)
             Roops(_, "%s: unexpected end of config", _->config);
           if (!strncmp(buf, "#END#", 5))
             break;
+          STR_rtrim(buf);
+          if (!buf[0] || buf[0]=='#')
+            continue;
+#if 0
+          pos	= spc(buf);
+#endif
           Raddr_add(_, buf, 0);
         }
       sscanf(buf+5, "%d", &cnt);
@@ -258,13 +222,13 @@ Rnameinfo(R, struct addrinfo *a)
 {
   char	*h, *p, *r;
 
-  h	= Ralloc(_, BUFSIZ);
-  p	= Ralloc(_, BUFSIZ);
+  h	= Malloc(BUFSIZ);
+  p	= Malloc(BUFSIZ);
   r	= getnameinfo(a->ai_addr, a->ai_addrlen, h, BUFSIZ, p, BUFSIZ, NI_DGRAM|NI_NUMERICHOST|NI_NUMERICSERV)
         ? NULL
-        : Rcats(_, h, ":", p, NULL);
-  Rfree(_, h);
-  Rfree(_, p);
+        : Mcatsn(h, ":", p, NULL);
+  MFREE(h);
+  MFREE(p);
   return r;
 }
 
@@ -280,7 +244,7 @@ R_config_save(R, int force)
       Rwarn(_, "%s: not saving config", _->config);
       return;
     }
-  name	= Rcat(_, _->config, ".tmp");
+  name	= Mcats(_->config, ".tmp");
   fail	= 1;
   errno	= 0;
   if ((fd = fopen(name, "w")) != 0)
@@ -291,18 +255,16 @@ R_config_save(R, int force)
       int		cnt;
 
       cnt	= 0;
-      for (i=0; i<_->dstcnt; i++)
-        for (a=_->dst[i]->a; a; a=a->ai_next)
+      for (i=0; i<_->dstcnt && !ferror(fd); i++)
+        for (a=_->dst[i]->a; a && !ferror(fd); a=a->ai_next)
           {
             n = Rnameinfo(_, a);
             if (n)
               {
                 fprintf(fd, "%s\n", n);
                 cnt++;
-                if (ferror(fd))
-                  break;
               }
-            Rfree(_, n);
+            MFREE(n);
           }
       fprintf(fd, "#END#%d\n", cnt);
       fail	= ferror(fd);
@@ -310,9 +272,9 @@ R_config_save(R, int force)
     }
   if (!fail)
     fail	= rename(name, _->config);
-  Rfree(_, name);
+  MFREE(name);
   Rlog(_, "%s: config save %s: %d entries", _->config, fail ? "failed" : "succeeded", _->dstcnt);
-  Rfree(_, name);
+  MFREE(name);
 }
 
 int
