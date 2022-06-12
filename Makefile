@@ -11,7 +11,9 @@ INSTALL_PREFIX=/usr/local
 
 SRCS=$(wildcard *.c)
 BINS=$(SRCS:.c=)
-CFLAGS=-Wall -O3 -g
+SETS=$(shell sed -n 's/^[	 /]*\*[*	 ]\*LIBS:[	 ]*//p' $(SRCS))
+CFLAGS=-Wall -O3 -g $(shell bash -xc 'pkg-config --cflags $(SETS)')
+LDLIBS=$(shell bash -xc 'pkg-config --libs $(SETS)')
 
 TMPDIR := .tmp
 
@@ -20,6 +22,10 @@ love:	all
 
 .PHONY:	all
 all:	$(BINS)
+
+hw:
+	echo $(LIBS)
+	echo $(LDLIBS)
 
 # Do not depend on $(BINS), as this usually is run with sudo
 .PHONY:	install
@@ -33,7 +39,7 @@ clean:
 
 .PHONY:	debian
 debian:
-	sudo apt-get install $(APT_INSTALL_FLAGS) -- `sed -n 's/^ #debian //p' *.c | tr ' ' '\n' | sort -u`
+	apt-get install $(APT_INSTALL_FLAGS) -- `sed -n 's/^[	 /]*\*[*	 ]*DEBIAN:[	 ]*//p' *.c | tr ' ' '\n' | sort -u`
 
 .PHONY:	test
 test:	all
@@ -63,7 +69,7 @@ debug:	all
 
 OBJS := $(SRCS:%.c=$(TMPDIR)/%.o)
 $(BINS):	$(OBJS)
-	$(CC) $(LDFLAGS) $(TMPDIR)/$@.o -o $@
+	$(CC) $(LDFLAGS) $(TMPDIR)/$@.o -o $@ $(LDLIBS)
 
 # I really have no idea why all this shit is needed
 
