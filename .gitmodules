@@ -1,0 +1,6 @@
+[submodule "libsignal-protocol-c"]
+	path = libsignal-protocol-c
+	url = https://github.com/signalapp/libsignal-protocol-c.git
+[submodule "ntru"]
+	path = ntru
+	url = https://github.com/jschanck/ntru.git
